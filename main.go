@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	clients "github.com/RoryRaeper/n-able-task-app/clients/mongodb"
 	"github.com/RoryRaeper/n-able-task-app/handlers"
@@ -22,12 +24,26 @@ func main() {
 	repo := clients.NewMongoDBClient(client, "TASK_STORE", "TASKS")
 	service := services.NewTaskService(repo)
 	handler := handlers.NewHandler(service)
+
 	router := gin.Default()
-	router.POST("/users", handler.CreateTask)
-	router.GET("/users", handler.ListTasks)
-	router.GET("/users/:id", handler.ListTasks)
-	router.PUT("/users/:id", handler.UpdateTask)
-	router.DELETE("/users/:id", handler.DeleteTask)
+	router.POST("/tasks", handler.CreateTask)
+	router.GET("/tasks", handler.ListTasks)
+	router.GET("/tasks/:id", handler.ListTasks)
+	router.PUT("/tasks/:id", handler.UpdateTask)
+	router.DELETE("/tasks/:id", handler.DeleteTask)
+
+	// Start the HTTP server
+	srv := &http.Server{
+		Handler:      router,
+		Addr:         ":8080",
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	log.Println("Starting server on :8080")
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func initMongoDB() *mongo.Client {

@@ -22,20 +22,23 @@ func NewMongoDBClient(client *mongo.Client, dbName, collectionName string) *Mong
 	return &MongoDBClient{collection}
 }
 
+// Creates a new task based on the provided task model
+// If successful, the task object is returned with its generated ID
 func (c *MongoDBClient) CreateTask(ctx context.Context, task models.Task) (*models.Task, error) {
-	task.ID = primitive.NewObjectID()
 	t := time.Now()
 	task.CreatedAt = t
 	task.UpdatedAt = t
 
-	_, err := c.collection.InsertOne(ctx, task)
+	result, err := c.collection.InsertOne(ctx, task)
 	if err != nil {
 		return nil, err
 	}
 
+	task.ID = result.InsertedID.(primitive.ObjectID)
 	return &task, nil
 }
 
+// Fetches the task with the provided ID from the database
 func (c *MongoDBClient) GetTaskByID(ctx context.Context, id primitive.ObjectID) (*models.Task, error) {
 	var task models.Task
 	err := c.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&task)
@@ -48,6 +51,7 @@ func (c *MongoDBClient) GetTaskByID(ctx context.Context, id primitive.ObjectID) 
 	return &task, nil
 }
 
+// Updates the task with the provided ID with the updated task information
 func (c *MongoDBClient) UpdateTask(ctx context.Context, id primitive.ObjectID, updatedTask models.Task) (*models.Task, error) {
 	updatedTask.UpdatedAt = time.Now()
 	update := bson.M{
@@ -62,11 +66,13 @@ func (c *MongoDBClient) UpdateTask(ctx context.Context, id primitive.ObjectID, u
 	return &updatedTask, nil
 }
 
+// Deletes the task with the provided ID
 func (c *MongoDBClient) DeleteTask(ctx context.Context, id primitive.ObjectID) error {
 	_, err := c.collection.DeleteOne(ctx, bson.M{"_id": id})
 	return err
 }
 
+// Returns all the tasks in the database with optional pagination/limiting/offset
 func (c *MongoDBClient) GetTasks(ctx context.Context, limit, offset int64) ([]models.Task, error) {
 	opts := options.Find()
 	if limit > 0 {
