@@ -2,7 +2,7 @@
 ## Rory Raeper
 
 ## How to Run
-To run the app, you'll need Go, node/npm, and docker installed.
+To run the app, you'll need `Go`, `node/npm`, and `docker` installed.
 Once these are present, all you need to do is run 
 ```
 setup_app.sh
