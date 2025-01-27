@@ -3,7 +3,8 @@
 
 ## How to Run
 To run the app, you'll need `Go`, `node/npm`, and `docker` installed.
-Once these are present, all you need to do is run 
+Once these are present, install the application in your Go directory (for example `go/src/`) as `github.com/RoryRaeper/n-able-task-app`
+Then all you need to do is run:
 ```
 setup_app.sh
 ```
