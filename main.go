@@ -10,6 +10,7 @@ import (
 	clients "github.com/RoryRaeper/n-able-task-app/clients/mongodb"
 	"github.com/RoryRaeper/n-able-task-app/handlers"
 	"github.com/RoryRaeper/n-able-task-app/services"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,6 +27,12 @@ func main() {
 	handler := handlers.NewHandler(service)
 
 	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"GET", "PUT", "POST", "DELETE"},
+		AllowHeaders: []string{"Content-Type"},
+	}))
+
 	router.POST("/tasks", handler.CreateTask)
 	router.GET("/tasks", handler.ListTasks)
 	router.GET("/tasks/:id", handler.ListTasks)
@@ -33,7 +40,7 @@ func main() {
 	router.DELETE("/tasks/:id", handler.DeleteTask)
 
 	// Start the HTTP server
-	srv := &http.Server{
+	server := &http.Server{
 		Handler:      router,
 		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
@@ -41,7 +48,7 @@ func main() {
 	}
 
 	log.Println("Starting server on :8080")
-	if err := srv.ListenAndServe(); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
